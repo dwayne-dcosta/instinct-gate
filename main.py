@@ -1,5 +1,8 @@
 # main.py - Master Entry Point Execution Pipeline
 
+import json
+import os
+import sys
 from openai import OpenAI
 from config import MODELS
 from router_agent import evaluate_and_route
@@ -45,10 +48,49 @@ def execute_model_call(user_prompt):
         fallback_msg = f"Connection Simulation Success! Router targeted {target_route.upper()}.\nError Captured: Local/Cloud Endpoints are offline during pre-hackathon testing phases."
         return fallback_msg
 
-#=====LOCAL RUNTIME TEST EXECUTION==========
-if __name__ == "__main__":
-    sample_query = "Translate the sentence 'Welcome to the AMD AI Developer Program' into French."
-    print(f"  Input Query: '{sample_query}'")
+def run_evaluation_pipeline():
+    """
+    Automated Leaderboard Interceptor: Ingests the evaluation dataset file arrays,
+    processes each prompt through the dynamic router, and serializes the final results.
+    """
+    input_path = "/input/tasks.json"
+    output_path = "/output/results.json"
+    
+    # 1. Verify existence of injected evaluation payload file from the harness
+    if not os.path.exists(input_path):
+        print(f"Harness Error: Input dataset not found at target path: {input_path}")
+        sys.exit(1)
+        
+    print(f"Loading official evaluation dataset from: {input_path}...")
+    with open(input_path, 'r') as f:
+        tasks = json.load(f)
+        
+    results = []
+    
+    # 2. Iterate through prompt dictionary arrays sequentially
+    print(f"Beginning evaluation processing loop for {len(tasks)} tasks...")
+    for index, task in enumerate(tasks, 1):
+        task_id = task.get("task_id")
+        prompt = task.get("prompt")
+        
+        print(f"\nProcessing Task [{index}/{len(tasks)}] - ID: {task_id}")
+        
+        # Route query through local token math prior to opening cloud sockets
+        generated_answer = execute_model_call(prompt)
+        
+        results.append({
+            "task_id": task_id,
+            "answer": generated_answer
+        })
+        
+    # 3. Serialize and write structural output back to mounted directory for automated grading
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w') as f:
+        json.dump(results, f, indent=2)
+        
+    print(f"\nLeaderboard evaluation pipeline successfully compiled! Results saved to {output_path}")
+    sys.exit(0) # Signal clean execution success to the platform harness
 
-    model_output = execute_model_call(sample_query)
-    print(f"\n Final Model Response:\n{model_output}\n")
+#=====AUTOMATED LEADBOARD CONTRACT RUNTIME==========
+if __name__ == "__main__":
+    run_evaluation_pipeline()
