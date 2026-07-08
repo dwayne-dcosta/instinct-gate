@@ -38,3 +38,32 @@ docker run --rm -p 8501:8501 amd-router-test
 ```
 
 Once initialized, navigate to `http://localhost:8501` in your web browser to interact with the real-time dynamic dashboard.
+
+---
+
+## 🛠️ Local Verification & Development Deployment
+
+Instinct Gate is fully containerized and strictly adheres to the official AMD Hackathon Track 1 execution runtime contract. The container operating architecture is completely stateless, dynamic, and free of hardcoded variables.
+
+### 📦 1. Public Container Registry Ingestion
+The compiled cross-platform `linux/amd64` multi-stage build manifest is hosted publicly on the GitHub Container Registry. Verify or pull the production layers using an authenticated or anonymous socket pass:
+```bash
+docker pull ghcr.io/dwayne-dcosta/amd-hackathon-prep:latest
+```
+
+### 🚢 2. Running Local Grader Pipeline Simulation
+To simulate the automated grading harness evaluation locally, mount your task input/output directories and pass the required environment configuration variables at runtime:
+
+```bash
+docker run --rm \
+  -v \$(pwd)/input:/input \
+  -v \$(pwd)/output:/output \
+  -e FIREWORKS_API_KEY="your_api_key_here" \
+  -e FIREWORKS_BASE_URL="https://api.fireworks.ai/inference/v1/" \
+  -e ALLOWED_MODELS="minimax-m3,gemma-4-31b-it" \
+  ghcr.io/dwayne-dcosta/amd-hackathon-prep:latest
+```
+
+### 📋 3. Input / Output Data Contract Enforcement
+* **Ingestion Portal:** Reads structured array strings sequentially from `/input/tasks.json` matching the `[{"task_id": "...", "prompt": "..."}]` schema layout.
+* **Egress Mapping:** Outputs valid, machine-parsable JSON matching the required schema to `/output/results.json` before signaling execution complete via a clean exit code (`exit 0`).
