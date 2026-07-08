@@ -12,7 +12,7 @@ MODELS = {
     },
     "remote_premium": {
         # CRITICAL UPDATE: Points directly to the automated grading engine's injected base routing url.
-        "url": os.getenv("FIREWORKS_BASE_URL", "https://api.fireworks.ai/inference/v1"),
+        "url": os.getenv("FIREWORKS_BASE_URL", "https://api.fireworks.ai/inference/v1/"),
         # CRITICAL UPDATE: Pulls the official system key at runtime without hardcoding sensitive strings.
         "key": os.getenv("FIREWORKS_API_KEY", ""),
         # UPDATE: Dynamically reads the official leaderboard model choice, defaulting to the optimal Qwen layer.
