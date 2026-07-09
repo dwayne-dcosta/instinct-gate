@@ -70,6 +70,24 @@ docker run --rm \
 
 ---
 
+## 🔑 Configuration & API Keys
+
+To run this application, you must provide your API keys for your local routing matrix and remote Fireworks AI serverless inference clusters.
+
+### Local Development
+Create a Streamlit secrets file at `.streamlit/secrets.toml` in your root directory and inject your credentials using the following structure:
+
+```toml
+# .streamlit/secrets.toml
+FIREWORKS_API_KEY = "your_fireworks_ai_api_key_here"
+LOCAL_EDGE_ENDPOINT = "your_local_inference_node_key_here"
+```
+
+### Cloud Deployment (Streamlit Community Cloud)
+If running on the Streamlit Cloud hub ecosystem, navigate straight to your App Dashboard -> **Settings** -> **Secrets**, and paste the exact same TOML parameters into the cloud configuration canvas workspace panel.
+
+---
+
 ### 📂 Repository File Manifesto
 * **`main.py`**: The official production entrypoint for the Track 1 grading engine container. Runs 100% stateless and parses environment tokens dynamically at runtime.
 * **`router_agent.py`**: Core heuristic decision module processing localized byte-pair character mathematics.
