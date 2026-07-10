@@ -21,7 +21,8 @@ RUN pip install --no-cache-dir  --upgrade pip && \
 # 7. Copy the rest of your local file architecture into the workspace.
 COPY . /app/
 
-# 8. Configure the container to launch the Streamlit server automatically.
-# Streamlit Cloud will ignore this line and boot app.py independently on the web panel.
-# CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-CMD ["python", "main.py"]
+# 8. Configure the container to execute via the python entrypoint.
+# This enables the automated grading bot to execute prompts directly through the command line.
+ENTRYPOINT ["python", "app.py"]
+
+
