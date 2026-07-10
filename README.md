@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Instinct-Gate-icon-clean.png"  alt="Instinct Gate Logo"/>
+  <img src="Instinct-Gate-icon-clean.png" width="500" alt="Instinct Gate Logo"/>
 </p>
 
 
