@@ -2,6 +2,11 @@
 import streamlit as st
 from router_agent import evaluate_and_route
 
+# Import decoupled modular tracking, governance, and optimization systems
+from telemetry_logger import log_telemetry_metrics
+from budget_guard import is_budget_exceeded
+from cache_manager import get_cached_route, set_cached_route
+
 # 1. Configure an eye-friendly, wide page state layout.
 st.set_page_config(
     page_title="AMD Hybrid Router Hub",
@@ -60,8 +65,11 @@ if __name__ == "__main__":
     absolute_output_dir = os.path.abspath("/output")
     absolute_output_file = os.path.join(absolute_output_dir, "results.json")
 
-    # The master array to accumulate all evaluated task outputs
     results_payload = []
+    tasks_list = []
+
+    # 1. Check if the Budget Guard circuit breaker has been tripped up front
+    budget_tripped = is_budget_exceeded(max_hourly_budget=0.005)
 
     # Strategy A: Check if the evaluator mounted a JSON tasks file
     if os.path.exists(absolute_input_file):
@@ -69,85 +77,80 @@ if __name__ == "__main__":
             with open(absolute_input_file, "r") as f:
                 task_data = json.load(f)
             
-            # Normalize single task objects into a loopable list array
             if isinstance(task_data, dict):
                 tasks_list = [task_data]
             elif isinstance(task_data, list):
                 tasks_list = task_data
-            else:
-                tasks_list = []
-                
-            # Iterate through every single task passed by the grading bot
-            for task in tasks_list:
-                if isinstance(task, dict):
-                    # Extract the mandatory ID (defaulting to "T01" if missing)
-                    current_task_id = task.get("task_id") or task.get("id") or "T01"
-                    
-                    # Extract the source prompt string context
-                    bot_prompt = task.get("prompt") or task.get("task") or task.get("input") or ""
-                    
-                    try:
-                        # Execute your internal semantic routing calculations
-                        verdict = evaluate_and_route(bot_prompt)
-                        
-                        # Print metrics cleanly to stdout stream
-                        print(f"{verdict['route'].upper()}", flush=True)
-                        print(f"{verdict['tokens']}", flush=True)
-                        print(f"{verdict['estimated_cost']}", flush=True)
-                        print("100.0%", flush=True)
-                        
-                        # Build a globally compliant dual-variable dictionary item
-                        task_output = {
-                            "task_id": str(current_task_id),
-                            "answer": str(verdict['route'].upper()),
-                            "route": str(verdict['route'].upper()),
-                            "tokens": int(verdict['tokens']),
-                            "estimated_cost": float(verdict['estimated_cost']),
-                            "reasoning": str(verdict.get('reasoning', 'Routed successfully via Instinct Gate.'))
-                        }
-                        results_payload.append(task_output)
-                        
-                    except Exception as eval_error:
-                        # Fallback mapping if a prompt evaluation error occurs
-                        fallback_item = {
-                            "task_id": str(current_task_id),
-                            "answer": "LOCAL_CHEAP",
-                            "route": "LOCAL_CHEAP",
-                            "tokens": 7,
-                            "estimated_cost": 0.0,
-                            "reasoning": f"Fallback mapping active: {str(eval_error)}"
-                        }
-                        results_payload.append(fallback_item)
         except Exception as file_error:
             print(f"Error parsing tasks.json: {str(file_error)}", file=sys.stderr)
 
     # Strategy B: Fallback to command-line arguments for local development
-    if not results_payload and len(sys.argv) > 1:
-        bot_prompt = " ".join(sys.argv[1:])
-        try:
-            verdict = evaluate_and_route(bot_prompt)
+    if not tasks_list and len(sys.argv) > 1:
+        tasks_list = [{
+            "task_id": "T01",
+            "prompt": " ".join(sys.argv[1:])
+        }]
+
+    # Strategy C: Master safety fallback item if no inputs exist anywhere
+    if not tasks_list:
+        tasks_list = [{
+            "task_id": "T01",
+            "prompt": "Default fallback validation prompt execution."
+        }]
+
+    # ========================================================================
+    # CORE TRACK PROCESSING & TELEMETRY LOGGING MATRIX
+    # ========================================================================
+    for task in tasks_list:
+        if isinstance(task, dict):
+            current_task_id = task.get("task_id") or task.get("id") or "T01"
+            bot_prompt = task.get("prompt") or task.get("task") or task.get("input") or ""
+            
+            # ⚡ CHECK PRE-ROUTING LOOKUP CACHE FIRST FOR SUB-MILLISECOND SPEED
+            cached_verdict = get_cached_route(bot_prompt)
+            
+            if cached_verdict:
+                verdict = cached_verdict
+            # If cache misses, fall back to our safety cost governance gates
+            elif budget_tripped:
+                verdict = {
+                    "route": "LOCAL_CHEAP",
+                    "tokens": 7,
+                    "estimated_cost": 0.0,
+                    "reasoning": "Budget Guard Active: Bypassed cloud to protect cost parameters."
+                }
+            else:
+                try:
+                    # Execute your core analytical routing pipeline
+                    verdict = evaluate_and_route(bot_prompt)
+                    
+                    # ⚡ CACHE THE NEW SUCCESSFUL VERDICT FOR FUTURE DUPLICATE HITS
+                    set_cached_route(bot_prompt, verdict, ttl_minutes=10)
+                    
+                except Exception as eval_error:
+                    verdict = {
+                        "route": "LOCAL_CHEAP",
+                        "tokens": 7,
+                        "estimated_cost": 0.0,
+                        "reasoning": f"Engine execution fallback: {str(eval_error)}"
+                    }
+
+            # Print metrics out cleanly to standard output streams
             print(f"{verdict['route'].upper()}", flush=True)
-            results_payload.append({
-                "task_id": "T01",
+            
+            # Construct compliant schema dictionary layout
+            task_output = {
+                "task_id": str(current_task_id),
                 "answer": str(verdict['route'].upper()),
                 "route": str(verdict['route'].upper()),
                 "tokens": int(verdict['tokens']),
                 "estimated_cost": float(verdict['estimated_cost']),
-                "reasoning": str(verdict.get('reasoning', 'Local CLI test validation.'))
-            })
-        except Exception:
-            pass
-
-    # Default safety structural item if both input arrays sit completely empty
-    if not results_payload:
-        results_payload.append({
-            "task_id": "T01",
-            "answer": "LOCAL_CHEAP",
-            "route": "LOCAL_CHEAP",
-            "tokens": 7,
-            "estimated_cost": 0.0,
-            "reasoning": "Default system validation fallback layer."
-        })
+                "reasoning": str(verdict.get('reasoning', 'Processed successfully.'))
+            }
+            results_payload.append(task_output)
+            
+            # 🪝 Invoke our decoupled append-only telemetry logging module
+            log_telemetry_metrics(current_task_id, bot_prompt, verdict)
 
     # ========================================================================
     # FILE SERIALIZATION LAYER (Guarantees Physical Data Delivery)
