@@ -32,17 +32,23 @@ def render_advanced_dashboard():
         except Exception as e:
             st.error(f"Telemetry log buffer ingestion warning: {str(e)}")
 
-    # ========================================================================
-    # 🛡️ STEP 2: BUDGET & CACHE METRICS AGGREGATION
+        # ========================================================================
+    # 🛡️ STEP 2: BUDGET & CACHE METRICS AGGREGATION (Session State Secured)
     # ========================================================================
     max_budget = 0.005000
-    hourly_spend = 0.000000
-    total_requests = 0
+    
+    # Initialize session tracking keys if they don't exist in browser memory yet
+    if "ui_total_requests" not in st.session_state:
+        st.session_state.ui_total_requests = 0
+    if "ui_cache_hits" not in st.session_state:
+        st.session_state.ui_cache_hits = 0
+    if "ui_hourly_spend" not in st.session_state:
+        st.session_state.ui_hourly_spend = 0.0
 
-    # Extract operational cache and local edge tracking metrics
-    cache_hits = len(df[df['reasoning_summary'].str.contains('CACHE|Cache', na=False) | (df['routing_target'] == 'LOCAL_CHEAP')])
-    ## cache_misses = total_requests - cache_hits
-
+    # Read tracking variables out of persistent memory state arrays
+    total_requests = st.session_state.ui_total_requests
+    cache_hits = st.session_state.ui_cache_hits
+    hourly_spend = st.session_state.ui_hourly_spend
 
     if df is not None and not df.empty:
         total_requests = len(df)
@@ -53,10 +59,13 @@ def render_advanced_dashboard():
         hourly_df = df[df['timestamp'] >= one_hour_ago]
         hourly_spend = float(hourly_df['precision_cost'].sum())
         
-        # Extract operational cache tracking metrics
-        # (Assuming hits have $0 cost and reason includes CACHE or LOCAL_CHEAP fallback matching)
-        cache_hits = len(df[df['reasoning_summary'].str.contains('CACHE|Cache', na=False)])
-        cache_misses = total_requests - cache_hits
+        # Extract operational cache and local edge tracking metrics
+        cache_hits = len(df[df['reasoning_summary'].str.contains('CACHE|Cache', na=False) | (df['routing_target'] == 'LOCAL_CHEAP')])
+        
+        # Update session memory states so they survive subsequent user clicks
+        st.session_state.ui_total_requests = total_requests
+        st.session_state.ui_cache_hits = cache_hits
+        st.session_state.ui_hourly_spend = hourly_spend
 
     # ========================================================================
     # 🎛️ STEP 3: HIGH-SIGNAL METRIC CARDS & GAUGES
