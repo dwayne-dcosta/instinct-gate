@@ -7,6 +7,13 @@ from telemetry_logger import log_telemetry_metrics
 from budget_guard import is_budget_exceeded
 from cache_manager import get_cached_route, set_cached_route
 
+# Import decoupled modular tracking, governance, optimization, and view systems
+from telemetry_logger import log_telemetry_metrics
+from budget_guard import is_budget_exceeded
+from cache_manager import get_cached_route, set_cached_route
+from dashboard_view import render_advanced_dashboard
+
+
 # 1. Configure an eye-friendly, wide page state layout.
 st.set_page_config(
     page_title="AMD Hybrid Router Hub",
@@ -18,6 +25,9 @@ st.set_page_config(
 st.title("Enterprise Token-Efficient Routing Hub")
 st.markdown("Track 1 Optimization Panel - Deployed on AMD Developer Cloud Architecture")
 st.write("----")
+
+# Invoke the high-signal analytics layout canvas
+render_advanced_dashboard()
 
 # 3. Construct the primary input payload area.
 st.subheader("Data Processing Unit")
