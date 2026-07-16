@@ -38,8 +38,11 @@ def render_advanced_dashboard():
     max_budget = 0.005000
     hourly_spend = 0.000000
     total_requests = 0
-    cache_hits = 0
-    cache_misses = 0
+
+    # Extract operational cache and local edge tracking metrics
+    cache_hits = len(df[df['reasoning_summary'].str.contains('CACHE|Cache', na=False) | (df['routing_target'] == 'LOCAL_CHEAP')])
+    cache_misses = total_requests - cache_hits
+
 
     if df is not None and not df.empty:
         total_requests = len(df)
