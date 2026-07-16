@@ -45,6 +45,9 @@ if st.button("Analyze & Route Payload", type="primary"):
         # Pass the UI text box entry straight into your verified routing engine.
         verdict = evaluate_and_route(user_query)
 
+        # 🪝 INJECT THE LOGGING HOOK HERE TO CAPTURE UI INTERACTION TELEMETRY
+        log_telemetry_metrics("UI_TEST", user_query, verdict)
+
         st.write("----")
         st.subheader("Real-Time Diagnostic Verdict")
 
