@@ -2,20 +2,26 @@
 import os
 import sys
 
-# Cleanly step back one directory layer to find the root files
+# 🕒 Step exactly one directory layer backward to locate your local root repository files
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
+# 🧼 Purge any stale module cache remnants to guarantee an immaculate from-scratch execution pass
+stale_modules = ['telemetry_logger', 'budget_guard', 'cache_manager', 'router_agent']
+for module in stale_modules:
+    if module in sys.modules:
+        del sys.modules[module]
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 
+# Import your decoupled modular infrastructure tracking parameters safely
+from telemetry_logger import log_telemetry
+from budget_guard import is_budget_exceeded
+from cache_manager import get_cached_response
 
-import streamlit as st
-import pandas as pd
-import os
-from datetime import datetime, timedelta, timezone
 
 def render_advanced_dashboard():
     """
