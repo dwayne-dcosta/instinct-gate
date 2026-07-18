@@ -29,7 +29,7 @@ def render_advanced_dashboard():
     and microsecond performance data onto the Streamlit canvas.
     """
     # 🔌 INJECT INFRASTRUCTURE IMPORTS LOCALLY HERE TO DEFEAT THE CIRCULAR LOOP
-    from telemetry_logger import log_telemetry
+    from telemetry_logger import log_telemetry_metrics
     from budget_guard import is_budget_exceeded
     from cache_manager import get_cached_response
 

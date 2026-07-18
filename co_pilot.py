@@ -12,7 +12,7 @@ if not os.environ.get("GEMINI_API_KEY"):
 genai.configure()
 
 # Initialize the high-capacity, enterprise-grade systems infrastructure model
-model = genai.GenerativeModel('gemini-1.5-pro')
+model = genai.GenerativeModel('gemini-1.5-pro-latest')
 chat = model.start_chat(history=[])
 
 print("\n" + "="*60)

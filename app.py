@@ -16,10 +16,8 @@ for module in stale_modules:
 import streamlit as st
 from router_agent import evaluate_and_route
 
-# Import decoupled modular tracking, governance, and optimization systems
+# 🎯 Inject your module reference locally inside your core operational function body block
 from telemetry_logger import log_telemetry_metrics
-from budget_guard import is_budget_exceeded
-from cache_manager import get_cached_route, set_cached_route
 
 # Import decoupled modular tracking, governance, optimization, and view systems
 from telemetry_logger import log_telemetry_metrics
