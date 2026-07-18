@@ -59,7 +59,7 @@ def render_advanced_dashboard():
         # 🧼 DROP ALL ROWS THAT ARE NOT VALID DATETIME OBJECTS (Cleans out string headers)
         df = df.dropna(subset=['timestamp'])
         
-        # Calculate trailing 60-minute spending metrics
+        # Calculate trailing 60-minute spending metrics cleanly
         now = datetime.now(timezone.utc)
         one_hour_ago = now - timedelta(hours=1)
         hourly_df = df[df['timestamp'] >= one_hour_ago]
