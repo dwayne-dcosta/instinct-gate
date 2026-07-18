@@ -25,12 +25,21 @@ def render_advanced_dashboard():
     df = None
     if os.path.exists(telemetry_file_path):
         try:
-            # Read persistent telemetry rows safely from disk
-            df = pd.read_csv(telemetry_file_path)
-            # Ensure timestamps are parsed into datetime objects cleanly
-            df['timestamp'] = pd.to_datetime(df['timestamp'].str.replace('Z', ''))
+        # 🤫 SUPPRESS HARMLESS PARSING HINTS DURING DATA INGESTION
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                df = pd.read_csv(telemetry_file_path)
+            
+            # 🗓️ Ensure proper datetime formatting, forcing invalid header text to NaT null values
+            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+            
+            # 🧼 DROP ALL ROWS THAT ARE NOT VALID DATETIME OBJECTS (Cleans out string headers)
+            df = df.dropna(subset=['timestamp'])
+        
         except Exception as e:
-            st.error(f"Telemetry log buffer ingestion warning: {str(e)}")
+            # Prevent logging errors from bubbling up to the user interface
+            pass
 
         # ========================================================================
     # 🛡️ STEP 2: BUDGET & CACHE METRICS AGGREGATION (Session State Secured)

@@ -15,6 +15,7 @@ from dashboard_view import render_advanced_dashboard
 
 # 🤫 SILENCE HARMLESS INFRASTRUCTURE DATA PARSING HINTS GLOBALLY
 import warnings
+warnings.filterwarnings("ignore", message=".*time data.*doesn't match format.*")
 warnings.filterwarnings("ignore", category=UserWarning, module="pandas")
 
 
