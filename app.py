@@ -13,6 +13,11 @@ from budget_guard import is_budget_exceeded
 from cache_manager import get_cached_route, set_cached_route
 from dashboard_view import render_advanced_dashboard
 
+# 🤫 SILENCE HARMLESS INFRASTRUCTURE DATA PARSING HINTS GLOBALLY
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pandas")
+
+
 
 # 1. Configure an eye-friendly, wide page state layout.
 st.set_page_config(
