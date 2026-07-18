@@ -53,6 +53,12 @@ def render_advanced_dashboard():
     if df is not None and not df.empty:
         total_requests = len(df)
         
+        # 🗓️ Convert strings to datetime objects, marking invalid text as NaT
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        
+        # 🧼 DROP ALL ROWS THAT ARE NOT VALID DATETIME OBJECTS (Cleans out string headers)
+        df = df.dropna(subset=['timestamp'])
+        
         # Calculate trailing 60-minute spending metrics
         now = datetime.now(timezone.utc)
         one_hour_ago = now - timedelta(hours=1)
