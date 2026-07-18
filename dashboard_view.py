@@ -53,8 +53,13 @@ def render_advanced_dashboard():
     if df is not None and not df.empty:
         total_requests = len(df)
         
-        # 🗓️ Ensure proper datetime formatting, forcing invalid text entries to NaT null values
-        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        # 🤫 SUPPRESS HARMLESS HINT WARNINGS FROM TELEMETRY DATA INGESTION
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # Convert strings to datetime objects, cleanly forcing invalid header rows to NaT null values
+            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        
         df = df.dropna(subset=['timestamp'])
         
         # 🧼 SECURE THE PRECISION COST COLUMN AGAINST STRING POLLUTION
