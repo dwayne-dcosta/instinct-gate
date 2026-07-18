@@ -1,7 +1,10 @@
 import os
 import sys
-# 🕒 Force append the current repository workspace directory straight into system lookup paths
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Force append the absolute project directory path into python system paths
+root_path = os.path.dirname(os.path.abspath(__file__))
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
 
 # app.py - Streamlit User Interface Dashboard
 import streamlit as st

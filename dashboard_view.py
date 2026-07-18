@@ -1,8 +1,11 @@
 # dashboard_view.py - High-Signal Analytics Frontend Module
 import os
 import sys
-# 🕒 Explicitly append the parent root folder path straight into python's lookup registry
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Cleanly step back one directory layer to find the root files
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
 
 import streamlit as st
 import pandas as pd
