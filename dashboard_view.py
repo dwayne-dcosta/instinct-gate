@@ -28,13 +28,12 @@ def render_advanced_dashboard():
     Renders enterprise telemetry logs, live budget metrics, 
     and microsecond performance data onto the Streamlit canvas.
     """
-    # 🔌 INJECT INFRASTRUCTURE IMPORTS LOCALLY HERE TO DEFEAT THE CIRCULAR LOOP
+    # 🔌 ALL INFRASTRUCTURE IMPORTS MUST LIVE INLINE HERE INSIDE THE FUNCTION BODY:
     from telemetry_logger import log_telemetry_metrics
     from budget_guard import is_budget_exceeded
-    from cache_manager import get_cached_response
+    from cache_manager import get_cached_response, set_cached_route
 
     # 📁 Path Matrix Setup
-    # Secure serverless sandboxed path fallback tracking
     telemetry_file_path = os.path.abspath("/output/telemetry_analytics.csv")
     if not os.path.exists(telemetry_file_path):
         telemetry_file_path = os.path.abspath("./output/telemetry_analytics.csv")
